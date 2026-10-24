@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="ckb" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>سیستەمی عەقارات</title>
+<style>
+:root{--navy:#17365d;--blue:#245da8;--bg:#f3f6fb;--ink:#172033;--muted:#64748b;--line:#dbe3ee;--green:#16845b;--red:#b42318}
+*{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;background:var(--bg);color:var(--ink)}
+header{background:linear-gradient(120deg,#17365d,#2868b2);color:white;padding:20px max(16px,calc((100% - 1200px)/2));}
+header h1{margin:0 0 6px;font-size:24px}header p{margin:0;color:#e1ebf9;font-size:14px}
+main{max-width:1200px;margin:18px auto;padding:0 14px 40px}.panel{background:white;border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:16px;box-shadow:0 3px 12px #19365d0b}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.between{justify-content:space-between}.muted{color:var(--muted);font-size:13px}
+button,.button{border:0;border-radius:10px;padding:11px 14px;background:var(--blue);color:#fff;font-weight:650;cursor:pointer;font-size:14px}button.secondary{background:#e8eef7;color:var(--navy)}button.danger{background:#fff0ee;color:var(--red)}button:disabled{opacity:.5}
+input,select,textarea{font:inherit;width:100%;padding:11px 12px;border:1px solid #cbd5e1;border-radius:10px;background:#fff;color:var(--ink);min-width:0}label{display:block;font-size:13px;font-weight:650;margin-bottom:6px}.field{min-width:0}.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.span2{grid-column:span 2}.span4{grid-column:1/-1}
+.statgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.stat{padding:14px;border-radius:12px;background:#f4f7fc;border:1px solid var(--line)}.stat b{display:block;font-size:22px;margin-top:6px;color:var(--navy)}
+.tablewrap{overflow:auto}table{border-collapse:collapse;width:100%;min-width:900px}th,td{text-align:right;padding:11px;border-bottom:1px solid var(--line);font-size:13px;vertical-align:top}th{background:#f5f8fc;color:#334155;white-space:nowrap}tr:hover td{background:#fafcff}.pill{display:inline-block;border-radius:99px;padding:4px 9px;background:#e8eef7;font-size:12px;white-space:nowrap}.pill.ok{background:#e0f5e9;color:#11643f}.pill.warn{background:#fff4d8;color:#8a5b00}.pill.done{background:#fee9e7;color:#a1261d}
+#app{display:none}.notice{padding:12px;border-radius:10px;background:#fff7df;color:#795500;font-size:13px;margin-top:10px}.error{color:#b42318;font-size:13px;white-space:pre-wrap}.hidden{display:none!important}.actions{display:flex;gap:6px}.small{padding:7px 9px;font-size:12px}.searchgrid{display:grid;grid-template-columns:2fr 1fr 1fr;gap:10px}.foot{font-size:12px;color:var(--muted);text-align:center;padding:10px}
+@media(max-width:760px){header{padding:18px 15px}header h1{font-size:21px}.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.span4{grid-column:1/-1}.statgrid{grid-template-columns:repeat(2,1fr)}.searchgrid{grid-template-columns:1fr 1fr}.searchgrid .wide{grid-column:1/-1}.panel{padding:13px}main{margin-top:12px}}
+@media(max-width:420px){.grid{grid-template-columns:1fr}.span2{grid-column:1/-1}.row.mobilecol{align-items:stretch;flex-direction:column}.searchgrid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header><h1>🏠 سیستەمی بەڕێوەبردنی عەقارات</h1><p>تۆمارکردنی موڵک، فرۆشتن و کرێ — دراو: دۆلاری ئەمریکی</p></header>
+<main>
+<section id="setup" class="panel">
+<h2>دەستپێکردن</h2>
+<p>بۆ هەڵگرتنی داتا لە نێوان چەند مۆبایل و کۆمپیوتەر، پێویستە پڕۆژەی Supabase دروست بکەیت و زانیارییەکانی لێرە دابنێیت. ڕێنمایی تەواو لە فایلەکەدا هەیە.</p>
+<div class="grid">
+<div class="field span2"><label>Supabase Project URL</label><input id="url" placeholder="https://xxxxxxxx.supabase.co"></div>
+<div class="field span2"><label>Supabase anon / publishable key</label><input id="key" placeholder="کلیلی گشتیی پڕۆژەکەت"></div>
+</div>
+<div class="row" style="margin-top:12px"><button id="connect">پەیوەندی و چوونەژوورەوە</button><button id="demo" class="secondary">تاقیکردنەوە بە داتای نموونە</button></div>
+<div class="notice">تەنها کلیلی anon/publishable بەکاربهێنە. کلیلی service_role یان نهێنی مەخە ناو وێبسایت.</div>
+<div id="setupmsg" class="error"></div>
+</section>
+<section id="auth" class="panel hidden">
+<div class="row between"><h2 id="authTitle">چوونەژوورەوە</h2><button class="secondary small" id="backsetup">گۆڕینی پەیوەندی</button></div>
+<div class="grid">
+<div class="field span2"><label>ئیمەیڵ</label><input id="email" type="email" autocomplete="email" placeholder="you@example.com"></div>
+<div class="field span2"><label>وشەی نهێنی</label><input id="password" type="password" autocomplete="current-password" placeholder="لانیکەم ٦ پیت"></div>
+</div>
+<div class="row" style="margin-top:12px"><button id="login">چوونەژوورەوە</button><button id="signup" class="secondary">دروستکردنی هەژمار</button></div><p id="authmsg" class="error"></p>
+</section>
+<section id="app">
+<div class="panel"><div class="row between mobilecol"><div><h2 style="margin:0">پوختەی ئۆفیس</h2><span id="userlabel" class="muted"></span></div><div class="row"><button id="addnew">＋ زیادکردنی موڵک</button><button id="logout" class="secondary">دەرچوون</button></div></div>
+<div class="statgrid" style="margin-top:14px">
+<div class="stat">کۆی موڵکەکان<b id="countAll">0</b></div><div class="stat">بەردەست<b id="countAvailable">0</b></div><div class="stat">فرۆشراو<b id="countSold">0</b></div><div class="stat">بەکرێدراو<b id="countRented">0</b></div>
+<div class="stat">کۆی نرخە داواکراوەکان<b id="sumAsking">$0</b></div><div class="stat">کۆی مامەڵە کۆتاییەکان<b id="sumDeals">$0</b></div><div class="stat">کۆی کۆمسیۆن<b id="sumCommission">$0</b></div><div class="stat">ژمارەی مامەڵەکان<b id="countDeals">0</b></div>
+</div></div>
+<section id="editor" class="panel hidden"><div class="row between"><h2 id="editorTitle">زیادکردنی موڵک</h2><button id="cancelEdit" class="secondary">داخستن</button></div>
+<form id="propertyForm"><input id="pid" type="hidden"><div class="grid">
+<div class="field"><label>جۆری موڵک *</label><select id="type" required><option value="">هەڵبژێرە</option><option>خانوو</option><option>زەوی</option><option>شوقە</option><option>دوکان</option></select></div>
+<div class="field"><label>جۆری مامەڵە *</label><select id="dealType" required><option value="">هەڵبژێرە</option><option>فرۆشتن</option><option>کرێ</option></select></div>
+<div class="field"><label>دۆخی موڵک *</label><select id="status" required><option>بەردەستە</option><option>لە ژێر گفتوگۆیە</option><option>فرۆشراوە</option><option>بەکرێدراوە</option><option>هەڵگیراوە</option></select></div>
+<div class="field"><label>ناوچە / ناونیشان *</label><input id="address" required placeholder="ناوچە، شەقام..."></div>
+<div class="field"><label>ڕووبەر (م²)</label><input id="area" type="number" min="0" step="any"></div>
+<div class="field"><label>نرخی داواکراو ($)</label><input id="asking" type="number" min="0" step="0.01"></div>
+<div class="field"><label>نرخی کۆتایی مامەڵە ($)</label><input id="finalPrice" type="number" min="0" step="0.01"></div>
+<div class="field"><label>ڕێژەی کۆمسیۆن (%)</label><input id="commissionRate" type="number" min="0" max="100" step="0.01" value="0"></div>
+<div class="field"><label>ناوی خاوەن موڵک</label><input id="owner" autocomplete="off"></div>
+<div class="field"><label>تەلەفۆنی خاوەن موڵک</label><input id="ownerPhone" type="tel" autocomplete="off"></div>
+<div class="field"><label>ناوی کڕیار / کرێچی</label><input id="customer" autocomplete="off"></div>
+<div class="field"><label>تەلەفۆنی کڕیار / کرێچی</label><input id="customerPhone" type="tel" autocomplete="off"></div>
+<div class="field"><label>بەرواری تۆمار</label><input id="createdDate" type="date"></div>
+<div class="field"><label>بەرواری مامەڵە</label><input id="dealDate" type="date"></div>
+<div class="field"><label>کارمەند</label><input id="staff"></div>
+<div class="field span2"><label>لینکی وێنەی موڵک (ئیختیاری)</label><input id="imageUrl" type="url" placeholder="https://..."></div>
+<div class="field span4"><label>تێبینی</label><textarea id="notes" rows="2"></textarea></div>
+</div><div class="row" style="margin-top:14px"><button type="submit">پاشەکەوتکردن</button><button type="button" id="cancelEdit2" class="secondary">پاشگەزبوونەوە</button></div><p id="formmsg" class="error"></p></form></section>
+<div class="panel"><div class="row between"><h2 style="margin:0">لیستی موڵکەکان</h2><button id="export" class="secondary">هەناردەکردنی CSV</button></div>
+<div class="searchgrid" style="margin-top:12px"><div class="wide"><label>گەڕان</label><input id="search" placeholder="ناونیشان، ژمارە، خاوەن، تەلەفۆن..."></div><div><label>جۆری موڵک</label><select id="filterType"><option value="">هەموو جۆرەکان</option><option>خانوو</option><option>زەوی</option><option>شوقە</option><option>دوکان</option></select></div><div><label>دۆخ</label><select id="filterStatus"><option value="">هەموو دۆخەکان</option><option>بەردەستە</option><option>لە ژێر گفتوگۆیە</option><option>فرۆشراوە</option><option>بەکرێدراوە</option><option>هەڵگیراوە</option></select></div></div>
+<div class="tablewrap" style="margin-top:12px"><table><thead><tr><th>ژمارە</th><th>موڵک / ناوچە</th><th>مامەڵە / دۆخ</th><th>ڕووبەر</th><th>نرخی داواکراو</th><th>خاوەن موڵک</th><th>تەلەفۆن</th><th>کڕیار / کرێچی</th><th>کۆمسیۆن</th><th>کردار</th></tr></thead><tbody id="tbody"></tbody></table></div><p id="empty" class="muted">هێشتا هیچ موڵکێک تۆمار نەکراوە.</p><p id="appmsg" class="error"></p></div>
+<div class="foot">سیستەمی عەقارات • پارێزگاری لە زانیارییەکانی کڕیار و خاوەن موڵک بکە.</div>
+</section>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const $=id=>document.getElementById(id);
+let client=null, user=null, properties=[], demoMode=false;
+const ids=['type','dealType','status','address','area','asking','finalPrice','commissionRate','owner','ownerPhone','customer','customerPhone','createdDate','dealDate','staff','imageUrl','notes'];
+const map={type:'property_type',dealType:'deal_type',status:'status',address:'address',area:'area_m2',asking:'asking_price',finalPrice:'final_price',commissionRate:'commission_rate',owner:'owner_name',ownerPhone:'owner_phone',customer:'customer_name',customerPhone:'customer_phone',createdDate:'created_date',dealDate:'deal_date',staff:'staff_name',imageUrl:'image_url',notes:'notes'};
+const today=()=>new Date().toISOString().slice(0,10);
+function money(n){return new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:2}).format(Number(n)||0)}
+function show(id,on=true){$(id).classList.toggle('hidden',!on)}
+function msg(id,t){$(id).textContent=t||''}
+function setView(v){show('setup',v==='setup');show('auth',v==='auth');show('app',v==='app')}
+function getConfig(){return {url:$('url').value.trim().replace(/\/$/,''),key:$('key').value.trim()}}
+$('connect').onclick=async()=>{const c=getConfig();if(!c.url.startsWith('https://')||!c.key){msg('setupmsg','تکایە Project URL و anon/publishable key ـی دروست بنووسە.');return}try{client=window.supabase.createClient(c.url,c.key);localStorage.setItem('aq_url',c.url);localStorage.setItem('aq_key',c.key);msg('setupmsg','');setView('auth');const {data}=await client.auth.getSession();if(data.session){user=data.session.user;await loadData()}}catch(e){msg('setupmsg',e.message)}};
+$('backsetup').onclick=()=>setView('setup');
+$('signup').onclick=async()=>{if(!client){msg('authmsg','سەرەتا پەیوەندی دروست بکە.');return}const {data,error}=await client.auth.signUp({email:$('email').value.trim(),password:$('password').value});msg('authmsg',error?error.message:'هەژمار داواکرا. ئەگەر پشتڕاستکردنەوەی ئیمەیڵ چالاکە، ئیمەیڵەکەت پشتڕاست بکەرەوە و پاشان بچۆ ژوورەوە.');if(data.session){user=data.user;await loadData()}};
+$('login').onclick=async()=>{const {data,error}=await client.auth.signInWithPassword({email:$('email').value.trim(),password:$('password').value});if(error){msg('authmsg',error.message);return}user=data.user;await loadData()};
+$('logout').onclick=async()=>{if(client&&!demoMode)await client.auth.signOut();user=null;setView('auth')};
+$('demo').onclick=()=>{demoMode=true;user={email:'تاقیکردنەوە (داتای ناوخۆیی)'};properties=JSON.parse(localStorage.getItem('aq_demo')||'[]');setView('app');$('userlabel').textContent='تاقیکردنەوەی ناوخۆیی — داتا لە هەمان وێبگەڕە';render()};
+async function loadData(){demoMode=false;setView('app');$('userlabel').textContent=user?.email||'';const {data,error}=await client.from('properties').select('*').order('created_at',{ascending:false});if(error){msg('appmsg','نەتوانرا داتا بخوێندرێتەوە: '+error.message+' — SQL ـی فایلەکە لە Supabase جێبەجێ کراوە؟');return}properties=data||[];render()}
+function idOf(p){return p.id}
+function getProp(id){return properties.find(p=>String(p.id)===String(id))}
+function propFromForm(){const p={};ids.forEach(k=>{let v=$(k).value;p[map[k]]=(['area','asking','finalPrice','commissionRate'].includes(k)?(v===''?null:Number(v)):v||null)});return p}
+function formReset(){ $('propertyForm').reset();$('pid').value='';$('commissionRate').value='0';$('createdDate').value=today();msg('formmsg','')}
+function edit(p){formReset();$('pid').value=p.id;ids.forEach(k=>{const v=p[map[k]];$(k).value=v??''});$('editorTitle').textContent='دەستکاریکردنی موڵک';show('editor');$('editor').scrollIntoView({behavior:'smooth'})}
+$('addnew').onclick=()=>{formReset();$('editorTitle').textContent='زیادکردنی موڵک';show('editor');$('editor').scrollIntoView({behavior:'smooth'})};
+['cancelEdit','cancelEdit2'].forEach(id=>$(id).onclick=()=>show('editor',false));
+$('propertyForm').onsubmit=async e=>{e.preventDefault();msg('formmsg','');const payload=propFromForm();if(demoMode){if($('pid').value){const i=properties.findIndex(p=>String(p.id)===$('pid').value);properties[i]={...properties[i],...payload,id:$('pid').value}}else properties.unshift({...payload,id:crypto.randomUUID(),property_code:'AQ-'+String(Date.now()).slice(-6),created_at:new Date().toISOString()});localStorage.setItem('aq_demo',JSON.stringify(properties));show('editor',false);render();return}
+if(!user){msg('formmsg','تکایە بچۆ ژوورەوە.');return}
+const pid=$('pid').value;let res;if(pid)res=await client.from('properties').update(payload).eq('id',pid).select().single();else res=await client.from('properties').insert({...payload,user_id:user.id}).select().single();if(res.error){msg('formmsg',res.error.message);return}if(pid){properties=properties.map(p=>String(p.id)===pid?res.data:p)}else properties.unshift(res.data);show('editor',false);render()};
+async function removeProp(id){if(!confirm('دڵنیایت دەتەوێت ئەم موڵکە بسڕیتەوە؟'))return;if(demoMode){properties=properties.filter(p=>String(p.id)!==String(id));localStorage.setItem('aq_demo',JSON.stringify(properties));render();return}const {error}=await client.from('properties').delete().eq('id',id);if(error){msg('appmsg',error.message);return}properties=properties.filter(p=>String(p.id)!==String(id));render()}
+function statusClass(s){if(s==='بەردەستە')return'ok';if(s==='لە ژێر گفتوگۆیە')return'warn';if(['فرۆشراوە','بەکرێدراوە'].includes(s))return'done';return''}
+function commission(p){return (Number(p.final_price)||0)*(Number(p.commission_rate)||0)/100}
+function render(){const all=properties;const filtered=all.filter(p=>{const s=$('search').value.toLowerCase();const text=[p.property_code,p.address,p.owner_name,p.owner_phone,p.customer_name,p.customer_phone,p.property_type].join(' ').toLowerCase();return(!s||text.includes(s))&&(!$('filterType').value||p.property_type===$('filterType').value)&&(!$('filterStatus').value||p.status===$('filterStatus').value)});$('countAll').textContent=all.length;$('countAvailable').textContent=all.filter(p=>p.status==='بەردەستە').length;$('countSold').textContent=all.filter(p=>p.status==='فرۆشراوە').length;$('countRented').textContent=all.filter(p=>p.status==='بەکرێدراوە').length;$('sumAsking').textContent=money(all.reduce((s,p)=>s+(Number(p.asking_price)||0),0));$('sumDeals').textContent=money(all.reduce((s,p)=>s+(Number(p.final_price)||0),0));$('sumCommission').textContent=money(all.reduce((s,p)=>s+commission(p),0));$('countDeals').textContent=all.filter(p=>Number(p.final_price)>0).length;
+$('tbody').innerHTML=filtered.map(p=>`<tr><td>${esc(p.property_code||String(p.id).slice(0,8))}</td><td><b>${esc(p.property_type||'—')}</b><br>${esc(p.address||'—')}<br><span class="muted">${esc(p.deal_type||'—')}</span></td><td>${esc(p.deal_type||'—')}<br><span class="pill ${statusClass(p.status)}">${esc(p.status||'—')}</span></td><td>${p.area_m2?esc(p.area_m2)+' م²':'—'}</td><td>${p.asking_price!=null?money(p.asking_price):'—'}</td><td>${esc(p.owner_name||'—')}</td><td>${esc(p.owner_phone||'—')}</td><td>${esc(p.customer_name||'—')}<br>${esc(p.customer_phone||'')}</td><td>${money(commission(p))}</td><td><div class="actions"><button class="small" data-edit="${esc(p.id)}">دەستکاری</button><button class="small danger" data-del="${esc(p.id)}">سڕینەوە</button></div></td></tr>`).join('');$('empty').classList.toggle('hidden',filtered.length>0);$('tbody').querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>edit(getProp(b.dataset.edit)));$('tbody').querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>removeProp(b.dataset.del))}
+function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+['search','filterType','filterStatus'].forEach(id=>$(id).addEventListener('input',render));
+$('export').onclick=()=>{const cols=['property_code','property_type','deal_type','status','address','area_m2','asking_price','final_price','commission_rate','owner_name','owner_phone','customer_name','customer_phone','created_date','deal_date','staff_name','notes'];const rows=[cols,...properties.map(p=>cols.map(k=>p[k]??''))];const csv='\ufeff'+rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\r\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8;'}));a.download='aqarat-list.csv';a.click();URL.revokeObjectURL(a.href)};
+const savedUrl=localStorage.getItem('aq_url'),savedKey=localStorage.getItem('aq_key');if(savedUrl&&savedKey){$('url').value=savedUrl;$('key').value=savedKey;client=window.supabase?.createClient(savedUrl,savedKey);if(client)client.auth.getSession().then(({data})=>{if(data.session){user=data.session.user;loadData() }else setView('setup')})}
+</script></body></html>
